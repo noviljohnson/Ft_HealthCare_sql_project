@@ -29,4 +29,54 @@ FROM disease d
 GROUP BY d.`diseaseName`;
 
 
+-- Problem Statement 3: Jacob, from insurance management, has noticed that insurance
+-- claims are not made for all the treatments. He also wants to figure out if the gender of the
+-- patient has any impact on the insurance claim. Assist Jacob in this situation by generating a
+-- report that finds for each gender the number of treatments, number of claims, and treatment-
+-- to-claim ratio. And notice if there is a significant difference between the treatment-to-claim
+-- ratio of male and female patients.
+
+select *, round(total_treatments/ total_claims, 2) as ratio from 
+(
+	select p.gender, count(t.treatmentID) as total_treatments,count(c.claimID) as total_claims 
+    from person p 
+        inner join treatment t on p.personID = t.patientID
+	    left join claim c on t.claimID = c.claimID
+	group by p.gender
+)a;
+
+
+
+-- Problem Statement 4: The Healthcare department wants a report about the inventory of
+-- pharmacies. Generate a report on their behalf that shows how many units of medicine each
+-- pharmacy has in their inventory, the total maximum retail price of those medicines, and the
+-- total price of all the medicines after discount.
+-- Note: discount field in keep signifies the percentage of discount on the maximum price.
+
+SELECT `pharmacyID`,COUNT(`medicineID`),ROUND(sum(`maxPrice`)), ROUND(SUM(`maxPrice`-`maxPrice`*discount/100))
+FROM pharmacy
+NATURAL JOIN keep
+NATURAL JOIN medicine
+GROUP BY `pharmacyID`
+ORDER BY `pharmacyID`;
+
+
+-- Problem Statement 5: The healthcare department suspects that some pharmacies
+-- prescribe more medicines than others in a single prescription, for them, generate a report
+-- that finds for each pharmacy the maximum, minimum and average number of medicines
+-- prescribed in their prescriptions.
+
+SELECT  p.`pharmacyID`,p.`prescriptionID`,min(c.quantity),max(c.quantity), avg(c.quantity)
+FROM prescription p
+JOIN contain c on c.`prescriptionID` = p.`prescriptionID`
+GROUP BY p.`pharmacyID`,p.`prescriptionID`
+ORDER BY p.`pharmacyID`;
+
+
+SELECT `pharmacyID`, MAX(quantity),MIN(quantity),AVG(quantity) 
+FROM prescription
+NATURAL JOIN contain
+GROUP BY `pharmacyID`;
+
+
 
