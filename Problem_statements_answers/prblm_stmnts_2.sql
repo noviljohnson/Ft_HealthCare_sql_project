@@ -82,53 +82,39 @@ WHERE cnt in (SELECT min(cnt) from cte WHERE dname=ct.dname) OR
 -- has more than one patient with the same disease.
 -- Note: 2 people are considered to be in the same household if they have the same address.
 
-
-
-SELECT addressID,COUNT(*) cnt
-FROM person 
-WHERE `personID` in (
-        SELECT patientId
-        FROM patient
-)
-GROUP BY `addressID`
-HAVING cnt > 1;
-
-
-select diseaseName,p.`addressID`, count(*)
-FROM disease d
-    JOIN treatment t  on t.`diseaseID` = d.`diseaseID`
-    JOIN patient pt on pt.`patientID` = t.`patientID`
-    JOIN person p on p.`personID` = pt.`patientID`
-    JOIN (
-        SELECT addressID,COUNT(*) cnt
-        FROM person 
-        WHERE `personID` in (
-            SELECT patientId
-            FROM patient
-        )
-GROUP BY `addressID`
-HAVING cnt > 1
-    )
-GROUP BY d.`diseaseName`, p.`addressID`
+SELECT a.diseaseName, sum(cnt_p)
+FROM
+    (    
+    SELECT d.diseaseName diseaseName,count(t.`patientID`) cnt_p--,COUNT(DISTINCT p.`addressID`)
+    from disease d 
+        JOIN treatment t on t.`diseaseID` = d.`diseaseID`
+        JOIN person p on p.`personID` = t.`patientID`
+    GROUP BY d.`diseaseName`, p.`addressID`
+    HAVING count(t.`patientID`) > 1) a
+GROUP BY a.diseaseName
 ;
 
 
-SELECT count(x.`personID`),x.`addressID`
-FROM person x
-    JOIN person y on x.`addressID` = y.`addressID` 
-GROUP BY x.`addressID`
-HAVING count(*) > 1
-ORDER BY x.`addressID`
-;
+
+-- Problem Statement 5: An Insurance company wants a state wise report of the treatments to claim
+-- ratio between 1 st April 2021 and 31 st March 2022 (days both included). Assist them to create such a
+-- report.
 
 
-SELECT diseaseID
-FROM disease d
+SELECT a.state, COUNT(t.`treatmentID`)/count( t.`claimID`)
+FROM address a
+    left JOIN person p on p.`addressID` = a.`addressID`
+    JOIN treatment t on t.`patientID` = p.`personID`
+    left JOIN claim c on c.`claimID` = t.`claimID`
+WHERE t.`date` BETWEEN '2021-04-01' and '2022-03-31'
+GROUP BY a.state
+order by a.state;
 
-WHERE patientID in (
-    SELECT patientID
-    FROM treatment
-    WHERE `diseaseID` = d.`diseaseID`
-)
-
- 
+SELECT state, COUNT(`treatmentID`)/COUNT(`claimID`) AS `treat-claim-ratio`
+FROM address
+LEFT JOIN person USING (`addressID`)
+INNER JOIN treatment ON person.`personID`=treatment.`patientID`
+LEFT JOIN claim USING (`claimID`)
+WHERE date BETWEEN '2021-04-01' AND '2022-03-31'
+GROUP BY state
+ORDER BY `treat-claim-ratio`;
