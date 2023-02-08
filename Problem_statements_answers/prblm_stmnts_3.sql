@@ -81,7 +81,7 @@ ORDER BY people_patient_ration
 -- that lists the total quantity of medicine each pharmacy in his state has prescribed that falls under
 -- Tax criteria I for treatments that took place in 2021. Assist Jhonny in generating the report.
 
-
+-- EXPLAIN FORMAT = tree 
 SELECT a.state, ph.`pharmacyName`, SUM(c.quantity)
 FROM address a
     JOIN pharmacy ph on ph.`addressID` = a.`addressID`
