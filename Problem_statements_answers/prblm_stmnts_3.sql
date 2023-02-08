@@ -43,8 +43,8 @@ with cte as
 (
     SELECT c.companyName cname, p.planName pname, count(t.treatmentID) count_claims
     FROM insurancecompany c
-        JOIN insuranceplan p on p.`companyID` = c.`companyID`
-        JOIN claim cl on cl.uin = p.uin
+        left JOIN insuranceplan p on p.`companyID` = c.`companyID`
+        RIGHT JOIN claim cl on cl.uin = p.uin
         JOIN treatment t on t.`claimID` = cl.`claimID`
     GROUP BY c.`companyName`, p.`planName`
     ORDER BY c.`companyName`, count_claims
@@ -55,6 +55,8 @@ WHERE count_claims in (SELECT min(count_claims) from cte WHERE cname=ct.cname
                         UNION
             SELECT max(count_claims) from cte WHERE cname=ct.cname )
 ;
+
+
 SELECT DISTINCT `companyName`
 FROM insurancecompany
 ORDER BY `companyName`;
