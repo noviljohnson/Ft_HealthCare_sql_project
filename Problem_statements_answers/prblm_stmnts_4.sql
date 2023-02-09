@@ -96,7 +96,6 @@ HAVING (quantity_tag = 'Low quantity' and discount='High') or (quantity_tag = 'H
 -- Mack, From HealthDirect Pharmacy, wants to get a list of all the affordable and costly,
 -- hospital-exclusive medicines in the database. Where affordable medicines are the medicines
 -- that have a maximum price of less than 50% of the avg maximum price of all the medicines
-
 -- in the database, and costly medicines are the medicines that have a maximum price of more
 -- than double the avg maximum price of all the medicines in the database. Mack wants clear
 -- text next to each medicine name to be displayed that identifies the medicine as affordable or
@@ -113,6 +112,7 @@ SELECT DISTINCT m.`productName`,
 FROM medicine m
     JOIN (SELECT AVG(maxPrice) avg_price
             FROM medicine) ag
+WHERE m.`hospitalExclusive`='S'
 HAVING `Affordable-Costly`  not LIKE 'None'
 ORDER BY `Affordable-Costly`
 ;

@@ -99,3 +99,45 @@ GROUP BY ph.`pharmacyName`, d.`diseaseName`
 -- Note: We can assume that the insurance company is targeting a region more if the patients
 -- of that region are claiming more insurance of that company.
 
+
+
+
+
+
+DROP PROCEDURE `genderWiseReport`;
+
+DELIMITER //
+
+CREATE PROCEDURE genderWiseReport(
+    IN disId INT
+    )
+BEGIN
+     declare nMales INT(10);
+     declare nFemales INT(19);
+     declare dName VARCHAR(45);
+
+    SELECT d.diseaseName, SUM(if(p.gender = 'male',1,0)), SUM(if(p.gender = 'female', 1, 0)) INTO dName, nMales,nFemales
+    FROM disease d 
+    INNER JOIN treatment t on t.`diseaseID` = d.`diseaseID`
+    INNER JOIN person p on p.`personID` = t.`patientID`
+    WHERE d.`diseaseID`=disId;
+
+    SELECT dName,nMales,nFemales, IF(nMales>nFemales,'Males','Females') AS 'Gender';
+ENd //
+
+
+DELIMITER ;
+
+CALL genderWiseReport(1);
+
+
+set @nMales=10;
+set @nFemales = 0;
+set @dName='N';
+
+SELECT d.diseaseName, SUM(if(p.gender = 'male',1,0)), SUM(if(p.gender = 'female', 1, 0)) INTO @dName, @nMales, @nFemales
+    FROM disease d 
+    INNER JOIN treatment t on t.`diseaseID` = d.`diseaseID`
+    INNER JOIN person p on p.`personID` = t.`patientID`
+    WHERE d.`diseaseID`=8;
+
